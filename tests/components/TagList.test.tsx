@@ -19,4 +19,11 @@ describe('TagList', () => {
     const listItems = await screen.findAllByRole('listitem')
     expect(listItems.length).toBeGreaterThan(0);
   })
+
+  /* it('should fetch api', async () => {
+    const response = await fetch('/categories');
+    const data = await response.json();
+    console.log(data)
+    expect(data).toHaveLength(3)
+  }) */
 })
