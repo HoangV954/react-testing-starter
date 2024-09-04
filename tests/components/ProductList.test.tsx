@@ -2,9 +2,28 @@ import { render, screen } from '@testing-library/react'
 import ProductList from '../../src/components/ProductList'
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
+import { db } from '../mocks/db';
 
 
 describe('ProductList', () => {
+  const productIds: number[] = []
+
+  beforeAll(() => {
+    [1, 2, 3].forEach(() => {
+      const product = db.product.create();
+      productIds.push(product.id)
+    })
+  })
+
+  afterAll(() => {
+    db.product.deleteMany({
+      where: {
+        id: {
+          in: productIds
+        }
+      }
+    })
+  })
 
   const renderProductList = () => {
     render(<ProductList />)
@@ -25,6 +44,14 @@ describe('ProductList', () => {
     renderProductList();
 
     const message = await screen.findByText(/no products/i);
+    expect(message).toBeInTheDocument();
+  })
+
+  it('should render an error when there\'s an error', async () => {
+    server.use(http.get('/products', () => HttpResponse.error()));
+    renderProductList();
+
+    const message = await screen.findByText(/error/i);
     expect(message).toBeInTheDocument();
   })
 })

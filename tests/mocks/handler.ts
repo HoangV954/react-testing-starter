@@ -1,8 +1,9 @@
-import { http, HttpResponse } from 'msw';
-import { products } from './data';
+
+import { db } from './db';
 
 export const handlers = [
-  http.get('/categories', () => {
+  ...db.product.toHandlers('rest')
+  /* http.get('/categories', () => {
     return HttpResponse.json([
       { id: 1, name: 'Music' },
       { id: 2, name: 'Books' },
@@ -23,5 +24,6 @@ export const handlers = [
     if (!product) return new HttpResponse(null, { status: 404 });
     return HttpResponse.json(product);
 
-  })
-]
+  }) */
+] // Hardcoding data is not recommended 
+
