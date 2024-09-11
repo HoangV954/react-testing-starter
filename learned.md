@@ -12,7 +12,9 @@
   + Replicate database (factory to produce mock products) with all queries methods (like a mock ORM just not typed - findFirst, where)
   + Importance of beforeAll (initialize server) and afterAll (clearServer)
   + Testing loading state + query lib
-
+- TESTING WITH PROVIDERS: 
+  + The order to which to wrap the provider goes from data to UI (Theme provider for Radix shall be the innermost if paired with ReactQuery QueryClient and CartProvider)
+  
 **SETTING UP**
 
 - Tests > Components + mocks(db+server+handler) + setup
@@ -20,16 +22,22 @@
 - Check eslint + ts file to ensure typed test, promise linted correctly 
 - A separate setup file (in tests folder) to include the import of testing library (so you dont have to re-import all the reusable fn phrases like describe, expect etc) => add into vitest config file
 - Use fakerjs, msw to mock data + server
+- "coverage": "vitest run --coverage" is insanely powerful to check if your tests are thorough
+
 _OPTIONAL_:
 - concurrently: "start": "concurrently \"npm run server\" \"npm run dev\"", to run both the backend and frontend
 - Separated providers file that nested all the providers (auth, query, redux)
 - Ctrl shift p => organize import
 - Ctrl . => import ALL
-
+- Shift - Alt - right arr: expand selection (or see dropdown selection in VScode => Quickly select codeblocks)
+- Ctrl + End: Go to end of file
+- Ctrl + Shift + \: Jump between matching brackets
 **Usual STEPS (methodically)**
 - Loading state
 - Error handling
-- Data rendering
+- Data rendering 
+- Logic flow: Arrange/ Act/ Assert
+- Refactor(Group database thingy (even with db query) separately from render fn)
 
 
 _Micro_:

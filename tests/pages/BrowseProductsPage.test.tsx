@@ -2,10 +2,11 @@ import { render, screen, waitForElementToBeRemoved } from '@testing-library/reac
 import BrowseProducts from '../../src/pages/BrowseProductsPage'
 import { Theme } from '@radix-ui/themes'
 import { Category, Product } from '../../src/entities'
-import { db } from '../mocks/db'
+import { db, getProductsByCategory } from '../mocks/db'
 import userEvent from '@testing-library/user-event'
 import { CartProvider } from '../../src/providers/CartProvider'
 import { simulateDelay, simulateError } from '../utils'
+import AllProviders from '../AllProviders'
 
 describe('BrowseProductsPage', () => {
 
@@ -16,7 +17,10 @@ describe('BrowseProductsPage', () => {
     [1, 2].forEach((item) => {
       const category = db.category.create({ name: `Category ${item}` }); // This is to prevent faker js randomizing into identical categories
       categories.push(category);
-      products.push(db.product.create());
+      [1, 2].forEach(() => {
+        products.push(db.product.create({ categoryId: category.id }));
+
+      })
     })
   })
 
@@ -40,22 +44,7 @@ describe('BrowseProductsPage', () => {
       }
     })
   })
-  const renderBrowseProducts = () => {
 
-    render(
-      <CartProvider>
-        <Theme>
-          <BrowseProducts />
-        </Theme>
-      </CartProvider>
-    )
-
-    return {
-      getProductsSkeleton: () => screen.queryByRole('progress-bar', { name: /products/i }),
-      getCategoriesSkeleton: () => screen.queryByRole('progress-bar', { name: /categories/i }),
-      getCategoriesCombobox: () => screen.queryByRole('combobox'),
-    }
-  }
 
   /* Loading state tests */
 
@@ -139,4 +128,95 @@ describe('BrowseProductsPage', () => {
       expect(screen.getByText(p.name)).toBeInTheDocument();
     })
   })
+
+  /* Test filtering functions */
+  it('should filter products by category', async () => {
+    const { selectCategory, expectProductsToBeInTheDocument } = renderBrowseProducts();
+
+
+    const selectedCategory = categories[0];
+    await selectCategory(selectedCategory.name);
+    const products = getProductsByCategory(selectedCategory.id);
+    expectProductsToBeInTheDocument(products);
+  })
+
+  it('should render all products if ALL category is selected', async () => {
+    // This is not refactored on purpose to see the logic flow of testing/ refactoring
+    // See previous test for refactored version 
+    const { getCategoriesSkeleton, getCategoriesCombobox } = renderBrowseProducts();
+
+    await waitForElementToBeRemoved(getCategoriesSkeleton);
+    const comboBox = getCategoriesCombobox();
+    const user = userEvent.setup();
+    await user.click(comboBox!);
+
+    // Act
+    const option = screen.getByRole('option', {
+      name: /all/i
+    })
+    await user.click(option);
+
+    // Assert
+    const products = db.product.getAll();
+
+    const rows = screen.getAllByRole('row');
+    // Table has heading so the rows might be + 1 in length
+    const dataRows = rows.slice(1);
+
+    expect(dataRows).toHaveLength(products.length);
+
+    products.forEach(product => {
+      expect(screen.getByText(product.name)).toBeInTheDocument()
+    })
+  })
+
+  const renderBrowseProducts = () => {
+
+    render(
+      <CartProvider>
+        <Theme>
+          <BrowseProducts />
+        </Theme>
+      </CartProvider>
+      , { wrapper: AllProviders })
+
+    const getCategoriesSkeleton = () => screen.queryByRole('progress-bar', { name: /categories/i });
+    const getProductsSkeleton = () => screen.queryByRole('progress-bar', { name: /products/i });// making sure data is LOADED (loading bar disappeared)
+    const getCategoriesCombobox = () => screen.queryByRole('combobox');
+
+    const selectCategory = async (name: RegExp | string) => {
+      // Arrange
+      await waitForElementToBeRemoved(getCategoriesSkeleton);
+      const comboBox = getCategoriesCombobox();
+      const user = userEvent.setup();
+      await user.click(comboBox!);
+
+      const option = screen.getByRole('option', {
+        name
+      })
+      await user.click(option);
+    }
+
+    const expectProductsToBeInTheDocument = (products: Product[]) => {
+      // Assert
+
+      const rows = screen.getAllByRole('row');
+      // Table has heading so the rows might be + 1 in length
+      const dataRows = rows.slice(1);
+
+      expect(dataRows).toHaveLength(products.length);
+
+      products.forEach(product => {
+        expect(screen.getByText(product.name)).toBeInTheDocument()
+      })
+    }
+
+    return {
+      getProductsSkeleton,
+      getCategoriesSkeleton,
+      getCategoriesCombobox,
+      selectCategory,
+      expectProductsToBeInTheDocument
+    }
+  }
 })
