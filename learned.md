@@ -4,17 +4,28 @@
 - getBy !== findBy (async)
 - vi.fn() to mock functions
 - extract render() method to a separated function so you dont have to retype all things like const {user, trigger, onChange} = renderComponent()
-- TESTING SELECT: careful about testing button functions in a select HTML (default, having to click once to expose the options and THEN click to choose what you need - you cant directly simulate a click onto the desire option at the start - the testing lib emulates real human interactions)
-- TESTING INPUT: e.g. Seach Box
-- TESTING IMAGES: e.g. ProductImageGallery
-- TESTING LIBRARY COMPONENT: Remember to check what kinda setup it needs to run (e.g: Toast component needs Toaster)
-- TESTING API:
+- _TESTING SELECT_: careful about testing button functions in a select HTML (default, having to click once to expose the options and THEN click to choose what you need - you cant directly simulate a click onto the desire option at the start - the testing lib emulates real human interactions)
+- _TESTING INPUT_: e.g. Seach Box
+- _TESTING IMAGES_: e.g. ProductImageGallery
+- _TESTING LIBRARY COMPONENT_: Remember to check what kinda setup it needs to run (e.g: Toast component needs Toaster)
+- _TESTING API_:
   + Replicate database (factory to produce mock products) with all queries methods (like a mock ORM just not typed - findFirst, where)
   + Importance of beforeAll (initialize server) and afterAll (clearServer)
   + Testing loading state + query lib
-- TESTING WITH PROVIDERS: 
+- _TESTING WITH PROVIDERS_: 
   + The order to which to wrap the provider goes from data to UI (Theme provider for Radix shall be the innermost if paired with ReactQuery QueryClient and CartProvider)
-  
+- _TESTING FORMS_: Same 2 steps: Rendering + user action
+  +  Render:
+    * Input fields
+    * Default Values
+    * Initial data
+    * Drop-down options
+  + User action:
+    * Interaction between fields (checkbox enable/ disable UI)
+    * Validation rules
+    * Form submission
+    * Form feedbacj & UX (Loading, toast...)
+
 **SETTING UP**
 
 - Tests > Components + mocks(db+server+handler) + setup
