@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { Toaster } from 'react-hot-toast'
 import ProductForm from '../../src/components/ProductForm'
 import { Category, Product } from '../../src/entities'
 import AllProviders from '../AllProviders'
@@ -23,16 +27,66 @@ describe('ProductForm', () => {
   })
 
   const renderForm = (product?: Product) => {
-    render(<ProductForm product={product} onSubmit={vi.fn()} />, { wrapper: AllProviders })
+    const onSubmit = vi.fn();
+
+    render(
+      <>
+        <ProductForm product={product} onSubmit={onSubmit} />
+        <Toaster></Toaster>
+      </>,
+      { wrapper: AllProviders })
 
     return {
+      onSubmit,
+      expectErrorToBeInTheDocument: (errMsg: RegExp) => {
+        const error = screen.getByRole('alert');
+        expect(error).toBeInTheDocument();
+        expect(error).toHaveTextContent(errMsg);
+      },
+
       waitForFormToLoad: async () => {
         await screen.findByRole('form');
+        const nameInput = screen.getByPlaceholderText(/name/i);
+        const priceInput = screen.getByPlaceholderText(/price/i);
+        const categoryInput = screen.getByRole('combobox', { name: /category/i });
+        const submitBtn = screen.getByRole('button');
+
+        type FormData = {
+          [K in keyof Product]: any
+        }
+
+        const validData: FormData = {
+          id: 1,
+          name: 'a',
+          price: 1,
+          categoryId: category.id
+        }
+
+        const fill = async (product: FormData) => { // group action to fill out the form
+          const user = userEvent.setup();
+
+          if (product.name !== undefined) {
+            await user.type(nameInput, product.name);
+          }
+
+          if (product.price !== undefined) {
+            await user.type(priceInput, product.price.toString());
+          }
+
+          await user.tab(); // fix for radix UI causing warning
+
+          await user.click(categoryInput);
+          const options = screen.getAllByRole('option');
+          await user.click(options[0]);
+          await user.click(submitBtn);
+        }
+
         return {
-          nameInput: screen.getByPlaceholderText(/name/i),
-          priceInput: screen.getByPlaceholderText(/price/i),
-          categoryInput: screen.getByRole('combobox', { name: /category/i }),
-          submitBtn: screen.getByRole('button')
+          nameInput,
+          priceInput,
+          categoryInput,
+          submitBtn,
+          fill, validData
         }
       },
       // nameInput: screen.getByPlaceholderText(/name/i)
@@ -92,24 +146,13 @@ describe('ProductForm', () => {
     },
 
   ])('should display an error if name is $scenario', async ({ name, errMsg }) => {
-    const { waitForFormToLoad } = renderForm();
+    const { waitForFormToLoad, expectErrorToBeInTheDocument } = renderForm();
 
     const form = await waitForFormToLoad();
+    await form.fill({ ...form.validData, name })
 
-    const user = userEvent.setup();
-    if (name !== undefined) {
-      await user.type(form.nameInput, name);
 
-    }
-    await user.type(form.priceInput, '10');
-    await user.click(form.categoryInput);
-    const options = screen.getAllByRole('option');
-    await user.click(options[0]);
-    await user.click(form.submitBtn);
-
-    const error = screen.getByRole('alert');
-    expect(error).toBeInTheDocument();
-    expect(error).toHaveTextContent(errMsg);
+    expectErrorToBeInTheDocument(errMsg);
 
   })
   it.each([
@@ -139,24 +182,59 @@ describe('ProductForm', () => {
     }
 
   ])('should display an error if price is $scenario', async ({ price, errMsg }) => {
-    const { waitForFormToLoad } = renderForm();
+    const { waitForFormToLoad, expectErrorToBeInTheDocument } = renderForm();
 
     const form = await waitForFormToLoad();
+    await form.fill({ ...form.validData, price })
 
-    const user = userEvent.setup();
-    await user.type(form.nameInput, 'a');
-    if (price !== undefined) {
-      await user.type(form.priceInput, price.toString());
+    expectErrorToBeInTheDocument(errMsg);
+  })
 
-    }
-    await user.click(form.categoryInput);
-    const options = screen.getAllByRole('option');
-    await user.click(options[0]);
-    await user.click(form.submitBtn);
+  /* Testing form submission */
 
-    const error = screen.getByRole('alert');
-    expect(error).toBeInTheDocument();
-    expect(error).toHaveTextContent(errMsg);
+  it('should call onSubmit with the correct data', async () => {
+    const { waitForFormToLoad, onSubmit } = renderForm();
 
+    const form = await waitForFormToLoad();
+    await form.fill({ ...form.validData });
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, ...formData } = form.validData
+    expect(onSubmit).toHaveBeenCalledWith(formData);
+
+  })
+
+
+  it('should display a toast if submission fails', async () => {
+    const { waitForFormToLoad, onSubmit } = renderForm();
+    onSubmit.mockRejectedValue('error')
+
+    const form = await waitForFormToLoad();
+    await form.fill({ ...form.validData });
+
+    const toast = await screen.findByRole('status')
+    expect(toast).toBeInTheDocument();
+    expect(toast).toHaveTextContent(/error/i);
+
+    //screen.debug // if you dont know how to trigger the toast
+  })
+
+  it('should disable submit button upon submission', async () => {
+    const { waitForFormToLoad, onSubmit } = renderForm();
+    onSubmit.mockReturnValue(new Promise(() => { }));
+
+    const form = await waitForFormToLoad();
+    await form.fill({ ...form.validData });
+
+    expect(form.submitBtn).toBeDisabled();
+  })
+  it('should re-enable submit button upon submission', async () => {
+    const { waitForFormToLoad, onSubmit } = renderForm();
+    onSubmit.mockResolvedValue({});
+
+    const form = await waitForFormToLoad();
+    await form.fill({ ...form.validData });
+
+    expect(form.submitBtn).not.toBeDisabled();
   })
 })

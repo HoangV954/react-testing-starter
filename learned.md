@@ -24,7 +24,10 @@
     * Interaction between fields (checkbox enable/ disable UI)
     * Validation rules
     * Form submission
-    * Form feedbacj & UX (Loading, toast...)
+    * Form feedback & UX (Loading, toast...)
+- _TESTING WITH CONTEXT/REDUX_:
+- _DEBUGGING CONSOLE_: 
+  + Figure out what test is causing the warning (use .only)
 
 **SETTING UP**
 
@@ -43,6 +46,8 @@ _OPTIONAL_:
 - Shift - Alt - right arr: expand selection (or see dropdown selection in VScode => Quickly select codeblocks)
 - Ctrl + End: Go to end of file
 - Ctrl + Shift + \: Jump between matching brackets
+- IMPORTANT: Ctrl click a letter inside a word will select the whole word
+
 **Usual STEPS (methodically)**
 - Loading state
 - Error handling
