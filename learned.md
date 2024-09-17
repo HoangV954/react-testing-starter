@@ -26,6 +26,7 @@
     * Form submission
     * Form feedback & UX (Loading, toast...)
 - _TESTING WITH CONTEXT/REDUX_:
+  + As ALWAYS: Test the behavior, not the implementation
 - _DEBUGGING CONSOLE_: 
   + Figure out what test is causing the warning (use .only)
 
