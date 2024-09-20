@@ -29,6 +29,10 @@
   + As ALWAYS: Test the behavior, not the implementation
 - _DEBUGGING CONSOLE_: 
   + Figure out what test is causing the warning (use .only)
+- _TESTING AUTHENTICATION_:
+  + Registration, log in, log out, change password, update profile data...
+- _TESTING ROUTES_:
+  + Route Setup, Invalid routes
 
 **SETTING UP**
 
@@ -48,7 +52,7 @@ _OPTIONAL_:
 - Ctrl + End: Go to end of file
 - Ctrl + Shift + \: Jump between matching brackets
 - IMPORTANT: Ctrl click a letter inside a word will select the whole word
-
+- npm un : uninstall packages
 **Usual STEPS (methodically)**
 - Loading state
 - Error handling

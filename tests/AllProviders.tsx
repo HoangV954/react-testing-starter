@@ -2,7 +2,6 @@ import { Theme } from "@radix-ui/themes"
 import { PropsWithChildren } from "react"
 import { QueryClient, QueryClientProvider } from "react-query"
 import { CartProvider } from "../src/providers/CartProvider"
-import ReduxProvider from "../src/providers/ReduxProvider"
 
 
 const AllProviders = ({ children }: PropsWithChildren) => {
@@ -17,13 +16,11 @@ const AllProviders = ({ children }: PropsWithChildren) => {
 
   return (
     <QueryClientProvider client={client}>
-      <ReduxProvider>
-        <CartProvider>
-          <Theme>
-            {children}
-          </Theme>
-        </CartProvider>
-      </ReduxProvider>
+      <CartProvider>
+        <Theme>
+          {children}
+        </Theme>
+      </CartProvider>
     </QueryClientProvider>
   )
 }

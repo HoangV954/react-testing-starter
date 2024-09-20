@@ -4,20 +4,17 @@ import { PropsWithChildren } from "react";
 import AuthProvider from "./AuthProvider";
 import { CartProvider } from "./CartProvider";
 import ReactQueryProvider from "./ReactQueryProvider";
-import ReduxProvider from "./ReduxProvider";
 import { LanguageProvider } from "./language/LanguageProvider";
 
 const Providers = ({ children }: PropsWithChildren) => {
   return (
-    <AuthProvider>
+    <AuthProvider> {/* Need to modify setups Auth so it works normally (children rendering) */}
       <ReactQueryProvider>
-        <ReduxProvider>
-          <CartProvider>
-            <LanguageProvider language="en">
-              <Theme>{children}</Theme>
-            </LanguageProvider>
-          </CartProvider>
-        </ReduxProvider>
+        <CartProvider>
+          <LanguageProvider language="en">
+            <Theme>{children}</Theme>
+          </LanguageProvider>
+        </CartProvider>
       </ReactQueryProvider>
     </AuthProvider>
   );
