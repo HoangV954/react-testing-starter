@@ -4,6 +4,7 @@
 - getBy !== findBy (async)
 - vi.fn() to mock functions
 - extract render() method to a separated function so you dont have to retype all things like const {user, trigger, onChange} = renderComponent()
+- Try to have consistency in your test (e.g. if you have to use both getBy and findBy then best to await the loading screen and then use getBy)
 - _TESTING SELECT_: careful about testing button functions in a select HTML (default, having to click once to expose the options and THEN click to choose what you need - you cant directly simulate a click onto the desire option at the start - the testing lib emulates real human interactions)
 - _TESTING INPUT_: e.g. Seach Box
 - _TESTING IMAGES_: e.g. ProductImageGallery

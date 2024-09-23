@@ -11,11 +11,13 @@ describe('Router', () => {
 
     expect(screen.getByRole('heading', { name: /home/i })).toBeInTheDocument();
   })
+
   it('should render the products for /products', () => {
     navigateTo('/products');
 
     expect(screen.getByRole('heading', { name: /products/i })).toBeInTheDocument();
   })
+
   it('should render the product details for /products/:id', async () => {
     const product = db.product.create();
 
@@ -30,5 +32,17 @@ describe('Router', () => {
         }
       }
     })
+  })
+
+  it('should render 404 for invalid routes', () => {
+    navigateTo('/invalid-route');
+
+    expect(screen.getByText(/not found/i)).toBeInTheDocument();
+  })
+
+  it('should render admin home page for /admin', () => {
+    navigateTo('/admin');
+
+    expect(screen.getByRole('heading', { name: /admin/i })).toBeInTheDocument();
   })
 })
